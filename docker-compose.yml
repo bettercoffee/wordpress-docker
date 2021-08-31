@@ -1,0 +1,78 @@
+version: "3"
+services:
+
+# Nginx Service
+ nginx:
+   image: nginx:latest
+   container_name: aproject-nginx
+   restart: unless-stopped
+   ports:
+      - "80:80"
+      - "443:443"
+   volumes:
+      - ./wordpress:/var/www/html
+      - ./nginx/conf.d/:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/letsencrypt
+      - ./nginx/log:/var/log/nginx
+   command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+   cap_add:
+      - all
+   networks:
+      default:
+        aliases:
+          - wordpress
+
+# Mariadb Service
+ mariadb:
+   image: mariadb:latest
+   container_name: aproject-mariadb
+   restart: unless-stopped
+   volumes:
+      - ./mysql/db:/var/lib/mysql
+   cap_add:
+      - all
+   environment: 
+      - TZ=${WORKSPACE_TIMEZONE}
+      - MYSQL_DATABASE=${MARIADB_DATABASE}
+      - MYSQL_USER=${MARIADB_USER}
+      - MYSQL_PASSWORD=${MARIADB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
+   networks:
+      default:
+        aliases:
+          - wordpress
+
+# Wordpress services
+ wordpress:
+   image: wordpress:latest
+   container_name: wordpress 
+   restart: unless-stopped
+   env_file: .env
+   environment:
+      - WORDPRESS_DB_HOST=aproject-mariadb:3306
+      - WORDPRESS_DB_USER=$MARIADB_USER
+      - WORDPRESS_DB_PASSWORD=$MARIADB_PASSWORD
+      - WORDPRESS_DB_NAME=achiko
+   volumes:
+      - ./wordpress:/var/www/html
+   networks:
+      default:
+        aliases:
+          - wordpress
+
+# Letsencrypt Services
+ aproject-certbot:
+   image: deliverous/certbot
+   container_name: aproject-certbot
+   volumes:
+      - ./nginx/ssl:/etc/letsencrypt
+      - wordpress:/var/www/html 
+   cap_add:
+      - all
+   command: certonly --webroot -w /var/www/staging.achiko.co --email tech@achiko.co --agree-tos --no-eff-email -d staging.achiko.co 
+   entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+   networks:
+      default:
+        aliases:
+          - wordpress
+

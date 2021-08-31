@@ -1,0 +1,35 @@
+### Remote Interpreter ####################################
+
+# Choose a Remote Interpreter entry matching name. Default is `aproject`
+PHP_IDE_CONFIG=serverName=aproject
+
+### Windows Path ##########################################
+
+# A fix for Windows users, to ensure the application path works
+#COMPOSE_CONVERT_WINDOWS_PATHS=1
+
+### Environment ###########################################
+
+# If you need to change the sources (i.e. to China), set CHANGE_SOURCE to true
+CHANGE_SOURCE=false
+
+### Docker Sync ###########################################
+
+# If you are using Docker Sync. For `osx` use 'native_osx', for `windows` use 'unison', for `linux` docker-sync is not required
+#DOCKER_SYNC_STRATEGY=native_osx
+
+###########################################################
+################ Containers Customization #################
+###########################################################
+
+### WORKSPACE #############################################
+WORKSPACE_TIMEZONE=UTC
+
+### MARIADB ###############################################
+
+MARIADB_DATABASE=your_database
+MARIADB_USER=your_username
+MARIADB_PASSWORD=Your_password
+MARIADB_PORT=3306
+MARIADB_ROOT_PASSWORD=Your_password_root_mariadb
+
